@@ -74,7 +74,14 @@ app.layout = html.Div([
     html.Br(),
     html.Br(),
 
+    # html.Div([
+    #   html.P('Generating graph ...'),
+    #   html.P(id='generating-graph')
+    # ]),
+
     html.Div(id='output-date-picker-range'),
+
+    html.Br(),
 
     dcc.Graph(id='my_plot')
 ])
@@ -101,7 +108,6 @@ def update_output(start_date, end_date):
     if len(string_prefix) == len('You have selected: '):
         return 'Select a date to see it displayed here'
     if plot_ready:
-        print('test3')
         data = df.copy()
         date_col = 'date'
         variant_col = 'variant_name'
@@ -140,6 +146,9 @@ def update_output(start_date, end_date):
                         x=date_col,
                         y='rolling_avg',
                         color=variant_col)
+
+        fig.update_layout(title='Specimen Count by Variant, averaged 3 days prior/after',
+                          yaxis_title='specimen count')
 
         return string_prefix, fig
     
