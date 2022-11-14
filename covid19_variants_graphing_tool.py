@@ -90,7 +90,7 @@ def user_pick(options, option_type):
         return user_pick(options, option_type)
     return options[int(choice)-1]
 
-years = [2021]
+years = [2021, 2022]
 months = {'January':1,
           'February':2, 
           'March':3, 
@@ -124,7 +124,7 @@ if end_yr < start_yr:
 
 if end_yr == start_yr:
     month_lst = list(months.keys())
-    end_mo = user_pick(month_lst[month_lst.index([k for k, v in months.items() if v == start_mo][0])+1:], 'ending month')
+    end_mo = user_pick(month_lst[month_lst.index([k for k, v in months.items() if v == start_mo][0]):], 'ending month')
 else:
     end_mo = user_pick(list(months.keys()), 'ending month')
 end_mo = months[end_mo]
