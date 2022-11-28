@@ -5,8 +5,10 @@ from dash.exceptions import PreventUpdate
 import pandas as pd 
 import numpy as np
 import plotly.express as px
+import dash_bootstrap_components as dbc
 
-app = Dash(__name__)
+# app = Dash(__name__)
+app = Dash(__name__, external_stylesheets=[dbc.themes.BOOTSTRAP])
 
 # ------------------------------------------------------------------------------
 
@@ -58,32 +60,41 @@ df = pd.read_csv('covid19variants.csv')
 
 # ------------------------------------------------------------------------------
 
-# WebApp layout
-app.layout = html.Div([
+# WebApp layout with BOOTSTRAP theme stylesheet for component positioning
+# Check 'covid19_variants_graphing_tool.py' for regular layout
+app.layout = dbc.Container([
+  dbc.Row([
+    dbc.Col([html.Br(),
+      html.H4("COVID-19 Variants Graphing App", style={'textAlign':'center'}),
+      html.Br()], width=12)
+  ]),
 
-    html.H1("COVID-19 Variants Graphing Web Application", 
-             style={'text-align':'center'}),
-
-    dcc.DatePickerRange(
+  dbc.Row([
+    dbc.Col([
+      dcc.DatePickerRange(
         id='my-date-picker-range',
         min_date_allowed=datetime.date(2021, 1, 1),
         max_date_allowed=datetime.date(2022, 9, 23),
         initial_visible_month=datetime.date(2021, 1, 1),
         end_date=datetime.date(2022, 9, 23)
-    ),
-    html.Br(),
-    html.Br(),
+    ), html.Br(), html.Br()], width=6),
+    dbc.Col([
+      dcc.Dropdown(
+        id='mydropdown',
+        options={x: x for x in df.variant_name.unique()},
+        multi=True,
+        placeholder='Select variants'
+      )], width=6)
+  ]),
 
-    # html.Div([
-    #   html.P('Generating graph ...'),
-    #   html.P(id='generating-graph')
-    # ]),
+  dbc.Row([
+    dbc.Col([
+      html.Div(id='output-date-picker-range'), html.Br()
+    ], width=12)
+  ]),
+  
+  dcc.Graph(id='my_plot')
 
-    html.Div(id='output-date-picker-range'),
-
-    html.Br(),
-
-    dcc.Graph(id='my_plot')
 ])
 
 
@@ -91,9 +102,12 @@ app.layout = html.Div([
     [Output('output-date-picker-range', 'children'),
     Output('my_plot', 'figure')],
     Input('my-date-picker-range', 'start_date'),
-    Input('my-date-picker-range', 'end_date'))
+    Input('my-date-picker-range', 'end_date'),
+    Input('mydropdown', 'value'),
+    prevent_initial_call=True)
 
-def update_output(start_date, end_date):
+
+def update_output(start_date, end_date, dropdown_val):
     string_prefix = 'You have selected: '
     plot_ready = False
     if start_date is not None:
@@ -108,7 +122,7 @@ def update_output(start_date, end_date):
     if len(string_prefix) == len('You have selected: '):
         return 'Select a date to see it displayed here'
     if plot_ready:
-        data = df.copy()
+        data = df.loc[df['variant_name'].isin(dropdown_val)]
         date_col = 'date'
         variant_col = 'variant_name'
 
@@ -147,7 +161,7 @@ def update_output(start_date, end_date):
                         y='rolling_avg',
                         color=variant_col)
 
-        fig.update_layout(title='Specimen Count by Variant, averaged 3 days prior/after',
+        fig.update_layout(title='Daily Specimen Count by Variant, averaged 3 days prior/after',
                           yaxis_title='specimen count')
 
         return string_prefix, fig

@@ -205,3 +205,31 @@ plt.show()
  # Long term goal: a script that a user picks on and a gouie will show up for user inputs
  # Add start month to end months if same year
  # CREATE AN APPLET !! Using Plotly
+
+  # # WebApp layout
+  # app.layout = html.Div([
+
+  #     html.H2("COVID-19 Variants Graphing App", 
+  #             style={'textAlign':'center'}),
+
+  #     dcc.DatePickerRange(
+  #         id='my-date-picker-range',
+  #         min_date_allowed=datetime.date(2021, 1, 1),
+  #         max_date_allowed=datetime.date(2022, 9, 23),
+  #         initial_visible_month=datetime.date(2021, 1, 1),
+  #         end_date=datetime.date(2022, 9, 23)
+  #     ),
+  #     html.Br(),
+  #     html.Br(),
+
+  #     # html.Div([
+  #     #   html.P('Generating graph ...'),
+  #     #   html.P(id='generating-graph')
+  #     # ]),
+
+  #     html.Div(id='output-date-picker-range'),
+
+  #     html.Br(),
+
+  #     dcc.Graph(id='my_plot')
+  # ])
