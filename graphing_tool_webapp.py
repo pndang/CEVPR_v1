@@ -10,6 +10,8 @@ import dash_bootstrap_components as dbc
 # app = Dash(__name__)
 app = Dash(__name__, external_stylesheets=[dbc.themes.BOOTSTRAP])
 
+app.config.suppress_callback_exceptions = True
+
 # ------------------------------------------------------------------------------
 
 # Function for calculating rolling averages
@@ -121,7 +123,7 @@ def update_output(start_date, end_date, dropdown_val):
         string_prefix = string_prefix + 'End Date: {}'.format(end_date_str)
     if len(string_prefix) == len('You have selected: '):
         return 'Select a date to see it displayed here'
-    if plot_ready:
+    if plot_ready and dropdown_val != None:
         data = df.loc[df['variant_name'].isin(dropdown_val)]
         date_col = 'date'
         variant_col = 'variant_name'
@@ -172,3 +174,5 @@ def update_output(start_date, end_date, dropdown_val):
 
 if __name__ == '__main__':
     app.run_server(debug=True)
+    # app.run_server(debug=True, dev_tools_ui=None, dev_tools_props_check=None)
+
