@@ -6,6 +6,8 @@ import pandas as pd
 import numpy as np
 import plotly.express as px
 import dash_bootstrap_components as dbc
+import seaborn as sns
+from PIL import Image, ImageDraw
 
 # app = Dash(__name__)
 app = Dash(__name__, external_stylesheets=[dbc.themes.BOOTSTRAP])
@@ -92,9 +94,59 @@ app.layout = dbc.Container([
   dbc.Row([
     dbc.Col([
       html.Div(id='output-date-picker-range'), html.Br()
-    ], width=12)
+    ], width=12),
+    html.P("Choose color palette:"),
+    dcc.RadioItems([
+        {
+            "label": html.Div(
+                [
+                    html.Img(src="/assets/inferno.png", height=30),
+                    html.Div("inferno", style={'font-size': 15, 'padding-left': 1}),
+                ], style={'display': 'flex', 'align-items': 'center', 'justify-content': 'center'}
+            ),
+            "value": "inferno",
+        },
+        {
+            "label": html.Div(
+                [
+                    html.Img(src="/assets/icefire.png", height=30),
+                    html.Div("icefire", style={'font-size': 15, 'padding-left': 1}),
+                ], style={'display': 'flex', 'align-items': 'center', 'justify-content': 'center'}
+            ),
+            "value": "icefire",
+        },
+        {
+            "label": html.Div(
+                [
+                    html.Img(src="/assets/rainbow.png", height=30),
+                    html.Div("rainbow", style={'font-size': 15, 'padding-left': 1}),
+                ], style={'display': 'flex', 'align-items': 'center', 'justify-content': 'center'}
+            ),
+            "value": "rainbow",
+        },
+        {
+            "label": html.Div(
+                [
+                    html.Img(src="/assets/autumn.png", height=30),
+                    html.Div("autumn", style={'font-size': 15, 'padding-left': 1}),
+                ], style={'display': 'flex', 'align-items': 'center', 'justify-content': 'center'}
+            ),
+            "value": "autumn",
+        },
+        {
+            "label": html.Div(
+                [
+                    html.Img(src="/assets/ocean.png", height=30),
+                    html.Div("ocean", style={'font-size': 15, 'padding-left': 1}),
+                ], style={'display': 'flex', 'align-items': 'center', 'justify-content': 'center'}
+            ),
+            "value": "ocean",
+        },
+    ], id='mypalette', value='mako')
   ]),
-  
+
+  html.Br(),
+
   dcc.Graph(id='my_plot')
 
 ])
@@ -106,10 +158,11 @@ app.layout = dbc.Container([
     Input('my-date-picker-range', 'start_date'),
     Input('my-date-picker-range', 'end_date'),
     Input('mydropdown', 'value'),
+    Input('mypalette', 'value'),
     prevent_initial_call=True)
 
 
-def update_output(start_date, end_date, dropdown_val):
+def update_output(start_date, end_date, dropdown_val, palette):
     string_prefix = 'You have selected: '
     plot_ready = False
     if start_date is not None:
@@ -157,11 +210,14 @@ def update_output(start_date, end_date, dropdown_val):
         # Concatenating the dataframes into one for plotting, drop rows with N/A
         variants_wra = pd.concat(variants_dict.values())
         variants_wra = variants_wra.dropna(subset=[date_col])
+        
+        palette = sns.color_palette(palette, len(variants)).as_hex()
 
         fig = px.line(data_frame=variants_wra,
-                        x=date_col,
-                        y='rolling_avg',
-                        color=variant_col)
+                      x=date_col,
+                      y='rolling_avg',
+                      color=variant_col,
+                      color_discrete_sequence=palette)
 
         fig.update_layout(title='Daily Specimen Count by Variant, averaged 3 days prior/after',
                           yaxis_title='specimen count')
