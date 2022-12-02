@@ -8,9 +8,14 @@ import plotly.express as px
 import dash_bootstrap_components as dbc
 import seaborn as sns
 from PIL import Image, ImageDraw
+import os 
 
 # app = Dash(__name__)
 app = Dash(__name__, external_stylesheets=[dbc.themes.BOOTSTRAP])
+
+server = app.server 
+
+# server.secret_key = os.environ.get('SECRET_KEY', 'my-secret-key')
 
 app.config.suppress_callback_exceptions = True
 
