@@ -81,13 +81,19 @@ data = pd.read_csv("covid19variants.csv")
 
 # Function to display user input choices in command prompt
 def user_pick(options, option_type):
+
     print("\nPlease choose "+str(option_type)+":")
+
     for idx, element in enumerate(options):
         print("{}) {}".format(idx+1, element))
+        
     choice = int(input("\nEnter number {}-{}: ".format(1, len(options))))
+
     if choice < 1 or choice > len(options):
         print("\nInvalid input, please enter one of the choices below: ")
+
         return user_pick(options, option_type)
+
     return options[int(choice)-1]
 
 years = [2021, 2022]
