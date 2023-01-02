@@ -271,7 +271,7 @@ def update_output(start_date, end_date, dropdown_val, palette, smoothing_period)
                       color=variant_col,
                       color_discrete_sequence=palette)
 
-        fig.update_layout(title='Daily Specimen Count by Variant, averaged 3 days prior/after',
+        fig.update_layout(title=f'Daily Specimen Count by Variant, averaged {smoothing_period} days prior/after',
                           yaxis_title='specimen count')
 
         return string_prefix, fig
