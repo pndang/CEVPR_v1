@@ -1,5 +1,5 @@
 import datetime
-from dash import Dash, dcc, html
+from dash import Dash, dcc, html, ALL, ctx
 from dash.dependencies import Input, Output
 from dash.exceptions import PreventUpdate
 import pandas as pd 
@@ -9,13 +9,13 @@ import dash_bootstrap_components as dbc
 import seaborn as sns
 from PIL import Image, ImageDraw
 import os 
+import warnings
+warnings.filterwarnings('ignore')
 
-# app = Dash(__name__)
 app = Dash(__name__, external_stylesheets=[dbc.themes.BOOTSTRAP])
 
 server = app.server 
 
-# server.secret_key = os.environ.get('SECRET_KEY', 'my-secret-key')
 
 app.config.suppress_callback_exceptions = True
 
@@ -72,6 +72,9 @@ if 'df' not in locals():
 
 # WebApp layout with BOOTSTRAP theme stylesheet for component positioning
 # Check 'covid19_variants_graphing_tool.py' for regular layout
+
+# ------------------------------------------------------------------------------
+
 app.layout = dbc.Container([
   dbc.Row([
     dbc.Col([
@@ -109,81 +112,60 @@ app.layout = dbc.Container([
       html.Br()
     ], width=12),
 
-    html.P("Choose color palette:"),
-
     html.Br(),
 
-    dcc.RadioItems(options=[
-        {
-            "label": html.Div(
-                [
-                    html.Img(src="/assets/inferno.png", height=30),
-                    html.Div("inferno", style={'font-size': 15, 'padding-left': 1}),
-                ], style={'display': 'flex', 'align-items': 'center', 'justify-content': 'center'}
-            ),
-            "value": "inferno",
-        },
-        {
-            "label": html.Div(
-                [
-                    html.Img(src="/assets/icefire.png", height=30),
-                    html.Div("icefire", style={'font-size': 15, 'padding-left': 1}),
-                ], style={'display': 'flex', 'align-items': 'center', 'justify-content': 'center'}
-            ),
-            "value": "icefire",
-        },
-        {
-            "label": html.Div(
-                [
-                    html.Img(src="/assets/rainbow.png", height=30),
-                    html.Div("rainbow", style={'font-size': 15, 'padding-left': 1}),
-                ], style={'display': 'flex', 'align-items': 'center', 'justify-content': 'center'}
-            ),
-            "value": "rainbow",
-        },
-        {
-            "label": html.Div(
-                [
-                    html.Img(src="/assets/autumn.png", height=30),
-                    html.Div("autumn", style={'font-size': 15, 'padding-left': 1}),
-                ], style={'display': 'flex', 'align-items': 'center', 'justify-content': 'center'}
-            ),
-            "value": "autumn",
-        },
-        {
-            "label": html.Div(
-                [
-                    html.Img(src="/assets/ocean.png", height=30),
-                    html.Div("ocean", style={'font-size': 15, 'padding-left': 1}),
-                ], style={'display': 'flex', 'align-items': 'center', 'justify-content': 'center'}
-            ),
-            "value": "ocean",
-        },
-    ], id='mypalette', value='mako'),
   ]),
-
-  html.Br(),
 
   dbc.Row([
     dbc.Col([
-        html.P("Choose smoothing period (rolling averages of n days prior & after):"),
-    ], width=5
+        dbc.Button(
+        "Choose color palette",
+        id="mypalette",
+        className="me-1"
     ),
+
+    dbc.Popover(
+        dbc.ListGroup(
+            [
+                dbc.ListGroupItem(
+                    [html.Img(src="/assets/inferno.png", height=30), "inferno"],
+                    id={"type": "list-group-item", "index": "inferno"}
+                ),
+                dbc.ListGroupItem(
+                    [html.Img(src="/assets/icefire.png", height=30), "icefire"],
+                    id={"type": "list-group-item", "index": "icefire"}
+                ),
+                dbc.ListGroupItem(
+                    [html.Img(src="/assets/rainbow.png", height=30), "rainbow"],
+                    id={"type": "list-group-item", "index": "rainbow"}
+                ),
+                dbc.ListGroupItem(
+                    [html.Img(src="/assets/autumn.png", height=30), "autumn"],
+                    id={"type": "list-group-item", "index": "autumn"}
+                ),
+                dbc.ListGroupItem(
+                    [html.Img(src="/assets/ocean.png", height=30), "ocean"],
+                    id={"type": "list-group-item", "index": "ocean"}
+                ),
+            ]
+        ),
+        target="mypalette",
+        body=True,
+        trigger="hover",
+    )
+    ], width=6),
+
     dbc.Col([
         html.Div(
         dcc.RadioItems(options=[
-        {'label': '0 ~ raw data', 'value': 0},
-        {'label': '1', 'value': 1},
-        {'label': '2', 'value': 2},
-        {'label': '3', 'value': 3},
-        {'label': '4', 'value': 4},
-        {'label': '5', 'value': 5}],
+        {'label': 'raw data', 'value': 0},
+        {'label': 'smoothed', 'value': 3}],
         id='smoothing-period', value=3, inline=True,
         labelStyle={'padding-left':42})
-    )], width={'size': 5, 'offset': 0})
-  ], justify='start'),
+    )], width=6)
+  ]),
 
-#   html.Br(),
+  html.Br(),
 
   dcc.Graph(id='my_plot')
   
@@ -196,12 +178,18 @@ app.layout = dbc.Container([
     Input('my-date-picker-range', 'start_date'),
     Input('my-date-picker-range', 'end_date'),
     Input('mydropdown', 'value'),
-    Input('mypalette', 'value'),
+    Input({'type': 'list-group-item', 'index': ALL}, 'n_clicks'),
     Input('smoothing-period', 'value'),
     prevent_initial_call=True)
 
 
 def update_output(start_date, end_date, dropdown_val, palette, smoothing_period):
+
+    if ctx.triggered_id.index not in ['inferno', 'icefire', 'rainbow', 'autumn', 'ocean']:
+        palette = 'turbo'
+    else: 
+        palette = ctx.triggered_id.index
+
     string_prefix = 'You have selected: '
     plot_ready = False
     if start_date is not None:
@@ -237,19 +225,19 @@ def update_output(start_date, end_date, dropdown_val, palette, smoothing_period)
 
         variants = data.get(variant_col).unique()
 
-        palette = sns.color_palette(palette, len(variants)).as_hex()
+        palette_reformatted = sns.color_palette(palette, len(variants)).as_hex()
 
         if smoothing_period == 0:
             fig = px.line(data_frame=data[data[variant_col].isin(variants)],
                       x=date_col,
                       y='specimens',
                       color=variant_col,
-                      color_discrete_sequence=palette)
+                      color_discrete_sequence=palette_reformatted)
 
             fig.update_layout(title='Daily Specimen Count by Variant',
                               yaxis_title='specimen count')
             
-            return string_prefix, fig
+            return f'{string_prefix} | Palette: {palette}', fig
 
         # Creating a dictionary of variants (keys are variant names & values are 
         # subset dataframes of variants)
@@ -269,12 +257,12 @@ def update_output(start_date, end_date, dropdown_val, palette, smoothing_period)
                       x=date_col,
                       y='rolling_avg',
                       color=variant_col,
-                      color_discrete_sequence=palette)
+                      color_discrete_sequence=palette_reformatted)
 
         fig.update_layout(title=f'Daily Specimen Count by Variant, averaged {smoothing_period} days prior/after',
                           yaxis_title='specimen count')
 
-        return string_prefix, fig
+        return f'{string_prefix} | Palette: {palette}', fig
     
     raise PreventUpdate
 
@@ -282,4 +270,3 @@ def update_output(start_date, end_date, dropdown_val, palette, smoothing_period)
 
 if __name__ == '__main__':
     app.run_server(debug=True)
-    # app.run_server(debug=True, dev_tools_ui=None, dev_tools_props_check=None)

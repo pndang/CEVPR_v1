@@ -1,0 +1,90 @@
+
+
+# app = Dash(__name__)
+
+# server.secret_key = os.environ.get('SECRET_KEY', 'my-secret-key')
+
+# test = html.Div([
+#     html.Img(src="/assets/inferno.png", height=30)
+# ])
+
+
+# html.P("Choose color palette:"),
+    
+    # dcc.RadioItems(options=[
+    #     {
+    #         "label": html.Div(
+    #             [
+    #                 html.Img(src="/assets/inferno.png", height=30),
+    #                 html.Div("inferno", style={'font-size': 15, 'padding-left': 1}),
+    #             ], style={'display': 'flex', 'align-items': 'center', 'justify-content': 'center'}
+    #         ),
+    #         "value": "inferno",
+    #     },
+    #     {
+    #         "label": html.Div(
+    #             [
+    #                 html.Img(src="/assets/icefire.png", height=30),
+    #                 html.Div("icefire", style={'font-size': 15, 'padding-left': 1}),
+    #             ], style={'display': 'flex', 'align-items': 'center', 'justify-content': 'center'}
+    #         ),
+    #         "value": "icefire",
+    #     },
+    #     {
+    #         "label": html.Div(
+    #             [
+    #                 html.Img(src="/assets/rainbow.png", height=30),
+    #                 html.Div("rainbow", style={'font-size': 15, 'padding-left': 1}),
+    #             ], style={'display': 'flex', 'align-items': 'center', 'justify-content': 'center'}
+    #         ),
+    #         "value": "rainbow",
+    #     },
+    #     {
+    #         "label": html.Div(
+    #             [
+    #                 html.Img(src="/assets/autumn.png", height=30),
+    #                 html.Div("autumn", style={'font-size': 15, 'padding-left': 1}),
+    #             ], style={'display': 'flex', 'align-items': 'center', 'justify-content': 'center'}
+    #         ),
+    #         "value": "autumn",
+    #     },
+    #     {
+    #         "label": html.Div(
+    #             [
+    #                 html.Img(src="/assets/ocean.png", height=30),
+    #                 html.Div("ocean", style={'font-size': 15, 'padding-left': 1}),
+    #             ], style={'display': 'flex', 'align-items': 'center', 'justify-content': 'center'}
+    #         ),
+    #         "value": "ocean",
+    #     },
+    # ], id='mypalette', value='mako'),
+
+
+#   dbc.Row([
+#     dbc.Col([
+#         html.P("Choose smoothing period (rolling averages of n days prior & after):"),
+#     ], width=5
+#     ),
+#     dbc.Col([
+#         html.Div(
+#         dcc.RadioItems(options=[
+#         {'label': '0 ~ raw data', 'value': 0},
+#         {'label': '1', 'value': 1},
+#         {'label': '2', 'value': 2},
+#         {'label': '3', 'value': 3},
+#         {'label': '4', 'value': 4},
+#         {'label': '5', 'value': 5}],
+#         id='smoothing-period', value=3, inline=True,
+#         labelStyle={'padding-left':42})
+#     )], width={'size': 5, 'offset': 0})
+#   ], justify='start'),
+
+#   html.Br(),
+
+
+    # print(palette)
+    # print(palette[0])
+    # print(f'{ctx.triggered_id.index}+{palette}')
+    
+
+# app.run_server(debug=True, dev_tools_ui=None, dev_tools_props_check=None)
