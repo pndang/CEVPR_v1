@@ -11,6 +11,9 @@ from PIL import Image, ImageDraw
 import os 
 import warnings
 warnings.filterwarnings('ignore')
+# import cProfile
+# import re
+# cProfile.run('re.compile("foo|bar")')
 
 app = Dash(__name__, external_stylesheets=[dbc.themes.BOOTSTRAP])
 
