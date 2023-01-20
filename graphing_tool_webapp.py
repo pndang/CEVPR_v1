@@ -14,7 +14,9 @@ warnings.filterwarnings('ignore')
 # import cProfile
 # import re
 # cProfile.run('re.compile("foo|bar")')
-from werkzeug.middleware.profiler import ProfilerMiddleware
+# from werkzeug.middleware.profiler import ProfilerMiddleware
+from timeit import default_timer as timer
+import dash
 
 app = Dash(__name__, external_stylesheets=[dbc.themes.BOOTSTRAP])
 
@@ -247,15 +249,19 @@ def update_output(start_date, end_date, dropdown_val, palette, smoothing_period)
         # subset dataframes of variants)
         variants_dict = {var: data[data[variant_col] == var] for var in variants}
 
+        start_1 = timer()
         # Calculating rolling averages for each variant dataframes in dictionary 
         for key, value in variants_dict.items():
             value.reset_index(inplace=True)
             calculate_rolling_avg(value, 5, smoothing_period)
             value.set_index('index', inplace=True)
+        dash.callback_context.record_timing('task_1', timer() - start_1, '1st task')
 
+        start_2 = timer()
         # Concatenating the dataframes into one for plotting, drop rows with N/A
         variants_wra = pd.concat(variants_dict.values())
         variants_wra = variants_wra.dropna(subset=[date_col])
+        dash.callback_context.record_timing('task_2', timer() - start_2, '2nd task')
 
         fig = px.line(data_frame=variants_wra,
                       x=date_col,
@@ -273,10 +279,9 @@ def update_output(start_date, end_date, dropdown_val, palette, smoothing_period)
 
 
 if __name__ == '__main__':
-  if os.getenv("PROFILER", None):
-    app.server.config["PROFILE"] = True
-    app.server.wsgi_app = ProfilerMiddleware(
-      app.server.wsgi_app, sort_by("cumtime", "tottime"), restrictions=[50]
-    )
   app.run_server(debug=True)
-    
+  app.enable_dev_tools(
+    dev_tools_ui=True,
+    dev_tools_serve_dev_bundles=True,
+  )
+     

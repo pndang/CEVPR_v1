@@ -88,3 +88,12 @@
     
 
 # app.run_server(debug=True, dev_tools_ui=None, dev_tools_props_check=None)
+
+
+
+
+if os.getenv("PROFILER", None):
+    app.server.config["PROFILE"] = True
+    app.server.wsgi_app = ProfilerMiddleware(
+      app.server.wsgi_app, sort_by("cumtime", "tottime"), restrictions=[50]
+    )
