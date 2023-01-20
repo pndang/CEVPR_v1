@@ -14,6 +14,7 @@ warnings.filterwarnings('ignore')
 # import cProfile
 # import re
 # cProfile.run('re.compile("foo|bar")')
+from werkzeug.middleware.profiler import ProfilerMiddleware
 
 app = Dash(__name__, external_stylesheets=[dbc.themes.BOOTSTRAP])
 
@@ -272,4 +273,10 @@ def update_output(start_date, end_date, dropdown_val, palette, smoothing_period)
 
 
 if __name__ == '__main__':
-    app.run_server(debug=True)
+  if os.getenv("PROFILER", None):
+    app.server.config["PROFILE"] = True
+    app.server.wsgi_app = ProfilerMiddleware(
+      app.server.wsgi_app, sort_by("cumtime", "tottime"), restrictions=[50]
+    )
+  app.run_server(debug=True)
+    
