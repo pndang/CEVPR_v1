@@ -249,14 +249,22 @@ def update_output(start_date, end_date, dropdown_val, palette, smoothing_period)
         # subset dataframes of variants)
         variants_dict = {var: data[data[variant_col] == var] for var in variants}
 
-        start_1 = timer()
-        # Calculating rolling averages for each variant dataframes in dictionary 
-        for key, value in variants_dict.items():
-            value.reset_index(inplace=True)
-            calculate_rolling_avg(value, 5, smoothing_period)
-            value.set_index('index', inplace=True)
-        dash.callback_context.record_timing('task_1', timer() - start_1, '1st task')
-        print(timer() - start_1)
+        # Profiling
+        n = 20
+        times = []
+        for ite in range(n):
+          task_name = f"task_{ite+1}"
+          start_1 = timer()
+          # Calculating rolling averages for each variant dataframes in dictionary 
+          for key, value in variants_dict.items():
+              value.reset_index(inplace=True)
+              calculate_rolling_avg(value, 5, smoothing_period)
+              value.set_index('index', inplace=True)
+          # dash.callback_context.record_timing(task_name, timer() - start_1, '1st task')
+          time = timer() - start_1
+          times.append(time)
+          print(f"Iteration {ite+1}/{n}: {time}")                
+        print(np.mean(times))
 
         start_2 = timer()
         # Concatenating the dataframes into one for plotting, drop rows with N/A
