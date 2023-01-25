@@ -256,6 +256,7 @@ def update_output(start_date, end_date, dropdown_val, palette, smoothing_period)
             calculate_rolling_avg(value, 5, smoothing_period)
             value.set_index('index', inplace=True)
         dash.callback_context.record_timing('task_1', timer() - start_1, '1st task')
+        print(timer() - start_1)
 
         start_2 = timer()
         # Concatenating the dataframes into one for plotting, drop rows with N/A
