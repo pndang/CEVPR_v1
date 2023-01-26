@@ -250,7 +250,7 @@ def update_output(start_date, end_date, dropdown_val, palette, smoothing_period)
         variants_dict = {var: data[data[variant_col] == var] for var in variants}
 
         # Profiling
-        n = 20
+        n = 50
         times = []
         for ite in range(n):
           task_name = f"task_{ite+1}"
@@ -289,8 +289,8 @@ def update_output(start_date, end_date, dropdown_val, palette, smoothing_period)
 
 if __name__ == '__main__':
   app.run_server(debug=True)
-  app.enable_dev_tools(
-    dev_tools_ui=True,
-    dev_tools_serve_dev_bundles=True,
-  )
+  # app.enable_dev_tools(
+  #   dev_tools_ui=True,
+  #   dev_tools_serve_dev_bundles=True,
+  # )
      
