@@ -11,7 +11,6 @@ from PIL import Image, ImageDraw
 import os 
 import warnings
 warnings.filterwarnings('ignore')
-from timeit import default_timer as timer
 import dash
 
 app = Dash(__name__, external_stylesheets=[dbc.themes.BOOTSTRAP])
@@ -253,7 +252,6 @@ def update_output(start_date, end_date, dropdown_val, palette, smoothing_period)
         # Concatenating the dataframes into one for plotting, drop rows with N/A
         variants_wra = pd.concat(variants_dict.values())
         variants_wra = variants_wra.dropna(subset=[date_col])
-        dash.callback_context.record_timing('task_2', timer() - start_2, '2nd task')
 
         fig = px.line(data_frame=variants_wra,
                       x=date_col,

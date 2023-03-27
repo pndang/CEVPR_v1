@@ -3,6 +3,9 @@
 # cProfile.run('re.compile("foo|bar")')
 # from werkzeug.middleware.profiler import ProfilerMiddleware
 # from queue import Queue
+from timeit import default_timer as timer
+
+dash.callback_context.record_timing('task_2', timer() - start_2, '2nd task')
 
 # app = Dash(__name__)
 
@@ -161,4 +164,3 @@ for i in range(total_rows):
   #   dev_tools_ui=True,
   #   dev_tools_serve_dev_bundles=True,
   # )
-  
