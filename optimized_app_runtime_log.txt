@@ -1,4 +1,5 @@
 New implementation with a smoothing algorithm using queue data structure:
+Initial method: row iterations
     
     1st timing:
         Iteration 1/50: 0.08882479999988391
@@ -529,4 +530,3 @@ New implementation with a smoothing algorithm using queue data structure:
         Iteration 49/50: 0.10639419999995425
         Iteration 50/50: 0.1312391999999818
         Average: 0.13295899599998848
-        

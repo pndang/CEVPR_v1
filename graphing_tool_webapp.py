@@ -18,7 +18,6 @@ app = Dash(__name__, external_stylesheets=[dbc.themes.BOOTSTRAP])
 
 server = app.server 
 
-
 app.config.suppress_callback_exceptions = True
 
 # ------------------------------------------------------------------------------
@@ -268,7 +267,6 @@ def update_output(start_date, end_date, dropdown_val, palette, smoothing_period)
         return f'{string_prefix} | Palette: {palette}', fig
     
     raise PreventUpdate
-
 
 
 if __name__ == '__main__':
