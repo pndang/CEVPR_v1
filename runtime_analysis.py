@@ -30,10 +30,9 @@ new_times = np.array([0.13816570400002093,
                       0.13295899599998848])
 
 plt.plot(iterations, og_times, iterations, new_times)
-plt.ylim((2, 5))
+plt.ylim((0, 5.5))
 plt.xlabel('# iteration')
 plt.ylabel('runtime, seconds')
 plt.title('runtime analysis')
-plt.show()
 
 plt.savefig("runtime_analysis.png")
