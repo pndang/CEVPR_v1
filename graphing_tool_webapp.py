@@ -11,13 +11,8 @@ from PIL import Image, ImageDraw
 import os 
 import warnings
 warnings.filterwarnings('ignore')
-# import cProfile
-# import re
-# cProfile.run('re.compile("foo|bar")')
-# from werkzeug.middleware.profiler import ProfilerMiddleware
 from timeit import default_timer as timer
 import dash
-# from queue import Queue
 
 app = Dash(__name__, external_stylesheets=[dbc.themes.BOOTSTRAP])
 
@@ -28,93 +23,48 @@ app.config.suppress_callback_exceptions = True
 
 # ------------------------------------------------------------------------------
 
-#Function for calculating rolling averages
+# Function for calculating rolling averages using queue data structure
 def calculate_rolling_avg(dataframe, column_idx, num_rows):
 
   """Calculate rolling averages of the data field at 'column_idx' by averaging
   'num_rows' rows prior and after."""
 
-  dataframe['rolling_avg'] = 0
-  for i in range(0, dataframe.shape[0]):
-    idx = i
-    last_idx = dataframe.shape[0]-1
-    count = 0  # count number of values added (imaginary), to handle the first and last num_rows rows
-               # Idea: if index is 0, assume num_rows "before" values already added, 
-               #       if index is 1, assume num_rows-1 "before" values already added, 
-               #       if index is -3, assume num_rows-2 "after" values already added,
-               #       so on
-    values_before = []
-    while len(values_before) < num_rows and count < num_rows:
-      if i == 0:
-        break
-      elif i < num_rows:
-        break
-      values_before.append(dataframe.iloc[idx-1][column_idx])
-      idx -= 1
-      count += 1   
-    
-    idx, count = i, 0
-    values_after = []
-    while len(values_after) < num_rows and count < num_rows:
-      if i == last_idx:
-        break
-      elif dataframe.shape[0]-i <= num_rows:
-        values_after = list(dataframe[dataframe.columns[column_idx]][i+1:])
-        break
-      values_after.append(dataframe.iloc[idx+1][column_idx])
-      idx += 1
-      count += 1
+  averages = []
+  q = []
+  total_rows = dataframe.shape[0]
+  data = list(dataframe.iloc[:, column_idx])
+  max_size = num_rows*2+1
+  pointer = 0
+  pointer_offset = 0
 
-    # Calculating the average
-    average = np.mean(values_before + [dataframe.iloc[i][column_idx]] + values_after)
-    dataframe.at[i, 'rolling_avg'] = average
+  for i in range(total_rows):
+    if i < num_rows:
+      q.append(data[i])
+      values = data[:i] + data[i: i+num_rows+1]
+    elif len(q) != max_size and i < max_size:
+      q.append(data[i])
+      pointer_offset += 1
+      if len(q) == max_size:
+        pointer = i - pointer_offset
+      continue
+    elif i == total_rows-1:
+      averages.append(np.mean(q))
+      del q[0]
+      q.append(data[i])
+      for j in range(pointer_offset):
+        values = data[pointer-num_rows:]
+        averages.append(np.mean(values))
+      continue
+    else:
+      values = q.copy()
+      del q[0]
+      q.append(data[i])
+      pointer += 1
+    averages.append(np.mean(values))      
 
-  return None
-
-# # Function for calculating rolling averages using queue data structure
-# def calculate_rolling_avg(dataframe, column_idx, num_rows):
-
-#   """Calculate rolling averages of the data field at 'column_idx' by averaging
-#   'num_rows' rows prior and after."""
-
-#   averages = []
-#   q = []
-#   total_rows = dataframe.shape[0]
-#   data = list(dataframe.iloc[:, column_idx])
-#   max_size = num_rows*2+1
-#   pointer = 0
-#   pointer_offset = 0
-
-#   for i in range(total_rows):
-#     if i < num_rows:
-#       q.append(data[i])
-#       values = data[:i] + data[i: i+num_rows+1]
-#     elif len(q) != max_size and i < max_size:
-#       q.append(data[i])
-#       pointer_offset += 1
-#       if len(q) == max_size:
-#         pointer = i - pointer_offset
-#       continue
-#     elif i == total_rows-1:
-#       averages.append(np.mean(q))
-#       del q[0]
-#       q.append(data[i])
-#       for j in range(pointer_offset):
-#         values = data[pointer-num_rows:]
-#         averages.append(np.mean(values))
-#       continue
-#     else:
-#       values = q.copy()
-#       del q[0]
-#       q.append(data[i])
-#       pointer += 1
-#     averages.append(np.mean(values))      
-
-#   # print(averages)
-#   # print(f'length: {len(averages)}')
-#   dataframe['rolling_avg'] = averages
+  dataframe['rolling_avg'] = averages
   
-#   return None
+  return None
 
 # Importing and cleaning dataset
 if 'df' not in locals():
@@ -295,24 +245,12 @@ def update_output(start_date, end_date, dropdown_val, palette, smoothing_period)
         # subset dataframes of variants)
         variants_dict = {var: data[data[variant_col] == var] for var in variants}
 
-        # Profiling
-        n = 50
-        times = []
-        for ite in range(n):
-          task_name = f"task_{ite+1}"
-          start_1 = timer()
-          # Calculating rolling averages for each variant dataframes in dictionary 
-          for key, value in variants_dict.items():
-              value.reset_index(inplace=True)
-              calculate_rolling_avg(value, 5, smoothing_period)
-              value.set_index('index', inplace=True)
-          # dash.callback_context.record_timing(task_name, timer() - start_1, '1st task')
-          time = timer() - start_1
-          times.append(time)
-          print(f"Iteration {ite+1}/{n}: {time}")                
-        print(np.mean(times))
-
-        start_2 = timer()
+        # Calculating rolling averages for each variant dataframes in dictionary 
+        for key, value in variants_dict.items():
+            value.reset_index(inplace=True)
+            calculate_rolling_avg(value, 5, smoothing_period)
+            value.set_index('index', inplace=True)
+          
         # Concatenating the dataframes into one for plotting, drop rows with N/A
         variants_wra = pd.concat(variants_dict.values())
         variants_wra = variants_wra.dropna(subset=[date_col])
@@ -335,8 +273,4 @@ def update_output(start_date, end_date, dropdown_val, palette, smoothing_period)
 
 if __name__ == '__main__':
   app.run_server(debug=True)
-  # app.enable_dev_tools(
-  #   dev_tools_ui=True,
-  #   dev_tools_serve_dev_bundles=True,
-  # )
      
