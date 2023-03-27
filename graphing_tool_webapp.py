@@ -17,6 +17,7 @@ warnings.filterwarnings('ignore')
 # from werkzeug.middleware.profiler import ProfilerMiddleware
 from timeit import default_timer as timer
 import dash
+from collections import deque
 
 app = Dash(__name__, external_stylesheets=[dbc.themes.BOOTSTRAP])
 
@@ -27,50 +28,7 @@ app.config.suppress_callback_exceptions = True
 
 # ------------------------------------------------------------------------------
 
-# # Function for calculating rolling averages
-# def calculate_rolling_avg(dataframe, column_idx, num_rows):
-
-#   """Calculate rolling averages of the data field at 'column_idx' by averaging
-#   'num_rows' rows prior and after."""
-
-#   dataframe['rolling_avg'] = 0
-#   for i in range(0, dataframe.shape[0]):
-#     idx = i
-#     last_idx = dataframe.shape[0]-1
-#     count = 0  # count number of values added (imaginary), to handle the first and last num_rows rows
-#                # Idea: if index is 0, assume num_rows "before" values already added, 
-#                #       if index is 1, assume num_rows-1 "before" values already added, 
-#                #       if index is -3, assume num_rows-2 "after" values already added,
-#                #       so on
-#     values_before = []
-#     while len(values_before) < num_rows and count < num_rows:
-#       if i == 0:
-#         break
-#       elif i < num_rows:
-#         break
-#       values_before.append(dataframe.iloc[idx-1][column_idx])
-#       idx -= 1
-#       count += 1   
-    
-#     idx, count = i, 0
-#     values_after = []
-#     while len(values_after) < num_rows and count < num_rows:
-#       if i == last_idx:
-#         break
-#       elif dataframe.shape[0]-i <= num_rows:
-#         values_after = list(dataframe[dataframe.columns[column_idx]][i+1:])
-#         break
-#       values_after.append(dataframe.iloc[idx+1][column_idx])
-#       idx += 1
-#       count += 1
-
-#     # Calculating the average
-#     average = np.mean(values_before + [dataframe.iloc[i][column_idx]] + values_after)
-#     dataframe.at[i, 'rolling_avg'] = average
-
-#   return None
-
-# Function for calculating rolling averages using queue data structure
+# Function for calculating rolling averages
 def calculate_rolling_avg(dataframe, column_idx, num_rows):
 
   """Calculate rolling averages of the data field at 'column_idx' by averaging
@@ -112,6 +70,61 @@ def calculate_rolling_avg(dataframe, column_idx, num_rows):
     dataframe.at[i, 'rolling_avg'] = average
 
   return None
+
+# # Function for calculating rolling averages using queue data structure
+# def calculate_rolling_avg(dataframe, column_idx, num_rows):
+
+#   """Calculate rolling averages of the data field at 'column_idx' by averaging
+#   'num_rows' rows prior and after."""
+
+#   averages = []
+#   queue = deque()
+#   total_rows = dataframe.shape[0]
+#   data = dataframe.iloc[:, column_idx]
+
+#   for i in range(total_rows):
+#     if i < 3:
+#       queue.append(data[i])
+#       values = data[:i] + data[i, i+num_rows+1]
+#     elif len(queue) < num_rows*2+1:
+#       queue.append(data[i])
+#       values = data[i-num_rows, i+num_rows+1]
+      
+
+#     idx = i
+#     last_idx = dataframe.shape[0]-1
+#     count = 0  # count number of values added (imaginary), to handle the first and last num_rows rows
+#                # Idea: if index is 0, assume num_rows "before" values already added, 
+#                #       if index is 1, assume num_rows-1 "before" values already added, 
+#                #       if index is -3, assume num_rows-2 "after" values already added,
+#                #       so on
+#     values_before = []
+#     while len(values_before) < num_rows and count < num_rows:
+#       if i == 0:
+#         break
+#       elif i < num_rows:
+#         break
+#       values_before.append(dataframe.iloc[idx-1][column_idx])
+#       idx -= 1
+#       count += 1   
+    
+#     idx, count = i, 0
+#     values_after = []
+#     while len(values_after) < num_rows and count < num_rows:
+#       if i == last_idx:
+#         break
+#       elif dataframe.shape[0]-i <= num_rows:
+#         values_after = list(dataframe[dataframe.columns[column_idx]][i+1:])
+#         break
+#       values_after.append(dataframe.iloc[idx+1][column_idx])
+#       idx += 1
+#       count += 1
+
+#     # Calculating the average
+#     average = np.mean(values_before + [dataframe.iloc[i][column_idx]] + values_after)
+#     dataframe.at[i, 'rolling_avg'] = average
+
+#   return None
 
 # Importing and cleaning dataset
 if 'df' not in locals():

@@ -15,9 +15,12 @@ og_times = [3.8163402300000002,
             3.678827141999991,
             3.8624800560000176]
 
-og_plot = sns.lineplot(x=iterations, y=og_times)
-plt.ylim((2, 5))
-plt.xlabel('# iteration')
-plt.ylabel('runtime, seconds')
-plt.title('runtime analysis')
+# og_plot = sns.lineplot(x=iterations, y=og_times)
+# plt.ylim((2, 5))
+# plt.xlabel('# iteration')
+# plt.ylabel('runtime, seconds')
+# plt.title('runtime analysis')
 # plt.show()
+test = [1, 2, 3, 4]
+print(test[:2] + test[2:])
+print(test[-1])

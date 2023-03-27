@@ -97,3 +97,11 @@ if os.getenv("PROFILER", None):
     app.server.wsgi_app = ProfilerMiddleware(
       app.server.wsgi_app, sort_by("cumtime", "tottime"), restrictions=[50]
     )
+
+for i in range(total_rows):
+    if i < 3:
+      queue.append(data[i])
+      values = data[:i] + data[i, i+num_rows+1]
+    elif len(queue) < num_rows*2+1:
+      queue.append(data[i])
+      values = data[i-num_rows, i+num_rows+1]
