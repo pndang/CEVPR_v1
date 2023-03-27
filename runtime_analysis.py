@@ -33,6 +33,10 @@ plt.plot(iterations, og_times, iterations, new_times)
 plt.ylim((0, 5.5))
 plt.xlabel('# iteration')
 plt.ylabel('runtime, seconds')
-plt.title('runtime analysis')
+plt.suptitle('App Runtime Analysis', fontsize=18)
+plt.title('Change: new smoothing algorithm using queue data structure', fontsize=10)
+plt.legend(['initial ~ row iteration', 'optimized ~ queue'])
 
 plt.savefig("runtime_analysis.png")
+
+
