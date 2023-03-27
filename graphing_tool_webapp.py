@@ -28,93 +28,93 @@ app.config.suppress_callback_exceptions = True
 
 # ------------------------------------------------------------------------------
 
-# Function for calculating rolling averages
-# def calculate_rolling_avg(dataframe, column_idx, num_rows):
-
-#   """Calculate rolling averages of the data field at 'column_idx' by averaging
-#   'num_rows' rows prior and after."""
-
-#   dataframe['rolling_avg'] = 0
-#   for i in range(0, dataframe.shape[0]):
-#     idx = i
-#     last_idx = dataframe.shape[0]-1
-#     count = 0  # count number of values added (imaginary), to handle the first and last num_rows rows
-#                # Idea: if index is 0, assume num_rows "before" values already added, 
-#                #       if index is 1, assume num_rows-1 "before" values already added, 
-#                #       if index is -3, assume num_rows-2 "after" values already added,
-#                #       so on
-#     values_before = []
-#     while len(values_before) < num_rows and count < num_rows:
-#       if i == 0:
-#         break
-#       elif i < num_rows:
-#         break
-#       values_before.append(dataframe.iloc[idx-1][column_idx])
-#       idx -= 1
-#       count += 1   
-    
-#     idx, count = i, 0
-#     values_after = []
-#     while len(values_after) < num_rows and count < num_rows:
-#       if i == last_idx:
-#         break
-#       elif dataframe.shape[0]-i <= num_rows:
-#         values_after = list(dataframe[dataframe.columns[column_idx]][i+1:])
-#         break
-#       values_after.append(dataframe.iloc[idx+1][column_idx])
-#       idx += 1
-#       count += 1
-
-#     # Calculating the average
-#     average = np.mean(values_before + [dataframe.iloc[i][column_idx]] + values_after)
-#     dataframe.at[i, 'rolling_avg'] = average
-
-#   return None
-
-# Function for calculating rolling averages using queue data structure
+#Function for calculating rolling averages
 def calculate_rolling_avg(dataframe, column_idx, num_rows):
 
   """Calculate rolling averages of the data field at 'column_idx' by averaging
   'num_rows' rows prior and after."""
 
-  averages = []
-  q = []
-  total_rows = dataframe.shape[0]
-  data = list(dataframe.iloc[:, column_idx])
-  max_size = num_rows*2+1
-  pointer = 0
-  pointer_offset = 0
+  dataframe['rolling_avg'] = 0
+  for i in range(0, dataframe.shape[0]):
+    idx = i
+    last_idx = dataframe.shape[0]-1
+    count = 0  # count number of values added (imaginary), to handle the first and last num_rows rows
+               # Idea: if index is 0, assume num_rows "before" values already added, 
+               #       if index is 1, assume num_rows-1 "before" values already added, 
+               #       if index is -3, assume num_rows-2 "after" values already added,
+               #       so on
+    values_before = []
+    while len(values_before) < num_rows and count < num_rows:
+      if i == 0:
+        break
+      elif i < num_rows:
+        break
+      values_before.append(dataframe.iloc[idx-1][column_idx])
+      idx -= 1
+      count += 1   
+    
+    idx, count = i, 0
+    values_after = []
+    while len(values_after) < num_rows and count < num_rows:
+      if i == last_idx:
+        break
+      elif dataframe.shape[0]-i <= num_rows:
+        values_after = list(dataframe[dataframe.columns[column_idx]][i+1:])
+        break
+      values_after.append(dataframe.iloc[idx+1][column_idx])
+      idx += 1
+      count += 1
 
-  for i in range(total_rows):
-    if i < num_rows:
-      q.append(data[i])
-      values = data[:i] + data[i: i+num_rows+1]
-    elif len(q) != max_size and i < max_size:
-      q.append(data[i])
-      pointer_offset += 1
-      if len(q) == max_size:
-        pointer = i - pointer_offset
-      continue
-    elif i == total_rows-1:
-      averages.append(np.mean(q))
-      del q[0]
-      q.append(data[i])
-      for j in range(pointer_offset):
-        values = data[pointer-num_rows:]
-        averages.append(np.mean(values))
-      continue
-    else:
-      values = q.copy()
-      del q[0]
-      q.append(data[i])
-      pointer += 1
-    averages.append(np.mean(values))      
+    # Calculating the average
+    average = np.mean(values_before + [dataframe.iloc[i][column_idx]] + values_after)
+    dataframe.at[i, 'rolling_avg'] = average
 
-  # print(averages)
-  # print(f'length: {len(averages)}')
-  dataframe['rolling_avg'] = averages
-  
   return None
+
+# # Function for calculating rolling averages using queue data structure
+# def calculate_rolling_avg(dataframe, column_idx, num_rows):
+
+#   """Calculate rolling averages of the data field at 'column_idx' by averaging
+#   'num_rows' rows prior and after."""
+
+#   averages = []
+#   q = []
+#   total_rows = dataframe.shape[0]
+#   data = list(dataframe.iloc[:, column_idx])
+#   max_size = num_rows*2+1
+#   pointer = 0
+#   pointer_offset = 0
+
+#   for i in range(total_rows):
+#     if i < num_rows:
+#       q.append(data[i])
+#       values = data[:i] + data[i: i+num_rows+1]
+#     elif len(q) != max_size and i < max_size:
+#       q.append(data[i])
+#       pointer_offset += 1
+#       if len(q) == max_size:
+#         pointer = i - pointer_offset
+#       continue
+#     elif i == total_rows-1:
+#       averages.append(np.mean(q))
+#       del q[0]
+#       q.append(data[i])
+#       for j in range(pointer_offset):
+#         values = data[pointer-num_rows:]
+#         averages.append(np.mean(values))
+#       continue
+#     else:
+#       values = q.copy()
+#       del q[0]
+#       q.append(data[i])
+#       pointer += 1
+#     averages.append(np.mean(values))      
+
+#   # print(averages)
+#   # print(f'length: {len(averages)}')
+#   dataframe['rolling_avg'] = averages
+  
+#   return None
 
 # Importing and cleaning dataset
 if 'df' not in locals():

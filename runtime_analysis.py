@@ -10,7 +10,7 @@ iterations = np.arange(1, 11, 1)
 og_times = np.array([3.8163402300000002, 
                      3.5382675099999985,
                      3.77384445,
-                     4.499156365999999,
+                     3.752621731999999,
                      3.483695513999999,
                      3.531312068000002,
                      3.5300044899999987,
@@ -39,4 +39,16 @@ plt.legend(['initial ~ row iteration', 'optimized ~ queue'])
 
 plt.savefig("runtime_analysis.png")
 
+initial = np.mean(og_times)
+new = np.mean(new_times)
 
+diff = abs(initial - new)
+diff_percentage = (diff / initial)*100
+
+print(f"Initial: {initial}, New: {new}")
+print(diff)
+print(diff_percentage)
+
+# Initial avg: 3.7263044285999998, New avg: 0.12209832960000233
+# Difference: 3.6042060989999976
+# Percentage difference: 96.7233399219109
