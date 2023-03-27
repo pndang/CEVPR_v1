@@ -105,3 +105,6 @@ for i in range(total_rows):
     elif len(queue) < num_rows*2+1:
       queue.append(data[i])
       values = data[i-num_rows, i+num_rows+1]
+
+# plt.savefig(sys.stdout.buffer)
+# sys.stdout.flush()
