@@ -49,7 +49,7 @@ new_times = np.array([0.13816570400002093,
 plt.plot(iterations, og_times, iterations, new_times)
 plt.ylim((0, 5.5))
 plt.xlabel('# iteration')
-plt.ylabel('runtime, seconds')
+plt.ylabel('avg runtime, seconds')
 plt.suptitle('App Runtime Analysis', fontsize=18)
 plt.title('Change: new smoothing algorithm using queue data structure', fontsize=10)
 plt.legend(['initial ~ row iteration', 'optimized ~ queue'])
