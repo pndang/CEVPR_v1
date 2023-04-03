@@ -24,6 +24,8 @@ import matplotlib.pyplot as plt
 
 iterations = np.arange(1, 11, 1)
 
+# Timing method: 10 iterations, 50 runs per iteration, calculate average per ite
+
 og_times = np.array([3.8163402300000002, 
                      3.5382675099999985,
                      3.77384445,
@@ -52,10 +54,9 @@ plt.xlabel('# iteration')
 plt.ylabel('avg runtime, seconds')
 plt.suptitle('App Runtime Analysis', fontsize=18)
 plt.title('Change: new smoothing algorithm using queue data structure', fontsize=10)
-plt.title('Timing method: 10 iterations, 50 runs per iteration', fontsize=10)
 plt.legend(['initial ~ row iteration', 'optimized ~ queue'])
 
-plt.savefig("runtime_analysis.png")
+plt.savefig("runtime_graph.png")
 
 initial = np.mean(og_times)
 new = np.mean(new_times)
