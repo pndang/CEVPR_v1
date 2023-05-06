@@ -12,6 +12,7 @@ import os
 import warnings
 warnings.filterwarnings('ignore')
 import dash
+import pickle
 
 app = Dash(__name__, external_stylesheets=[dbc.themes.BOOTSTRAP])
 
@@ -66,7 +67,9 @@ def calculate_rolling_avg(dataframe, column_idx, num_rows):
 
 # Importing and cleaning dataset
 if 'df' not in locals():
-    df = pd.read_csv('covid19variants.csv')
+    path = 'data/'
+    fp = os.path.join(path, 'covid19variants.csv')
+    df = pd.read_csv(fp)
 
 # ------------------------------------------------------------------------------
 
@@ -90,8 +93,12 @@ app.layout = dbc.Container([
         id='my-date-picker-range',
         min_date_allowed=datetime.date(2021, 1, 1),
         max_date_allowed=datetime.date(2022, 9, 23),
-        initial_visible_month=datetime.date(2021, 1, 1),
-        end_date=datetime.date(2022, 9, 23)
+        with_portal=True,
+        end_date=datetime.date(2022, 9, 23),
+        number_of_months_shown=3,
+
+        clearable=True,
+        reopen_calendar_on_clear=True
     ), 
     html.Br(), 
     html.Br()], width=6),
@@ -191,31 +198,47 @@ def update_output(start_date, end_date, dropdown_val, palette, smoothing_period)
         palette = ctx.triggered_id.index
 
     string_prefix = 'You have selected: '
-    plot_ready = False
+    has_start, has_end = False, False
     if start_date is not None:
         start_date_obj = datetime.date.fromisoformat(start_date)
         start_date_str = start_date_obj.strftime('%B %d, %Y')
         string_prefix = string_prefix + 'Start Date: {} | '.format(start_date_str)
-        plot_ready = True
+        has_start = True
     if end_date is not None:
         end_date_obj = datetime.date.fromisoformat(end_date)
         end_date_str = end_date_obj.strftime('%B %d, %Y')
         string_prefix = string_prefix + 'End Date: {}'.format(end_date_str)
+        has_end = True
     if smoothing_period is not None:
         string_prefix = string_prefix + ' | Smoothing range: {} days'.format(smoothing_period*2)
-    if plot_ready and dropdown_val != None:
-        if dropdown_val == 'all' or dropdown_val == []:
-            data = df.copy()
-        else:
-            data = df.loc[df['variant_name'].isin(dropdown_val)]
+    if has_start and has_end and dropdown_val != None:
         date_col = 'date'
         variant_col = 'variant_name'
 
-        # Check if time_col column is of type datetime, proceed if yes, convert 
-        # to datetime if no
-        if data.get(date_col).dtypes == '<M8[ns]':
+        cached = False
+        fp = os.path.join(path, 'memoize.pickle')
+        if os.path.exists(fp):
+          with open(fp, 'rb') as f:
+            cache = pickle.load(f)
+            if (cache[date_col].min() <= start_date_obj) & \
+              (cache[date_col].max() >= end_date_obj):
+              if dropdown_val == 'all' or dropdown_val == []:
+                data = cache.copy()
+              else:
+                data = cache.loc[cache[variant_col].isin(dropdown_val)]
+              cached = True
+
+        if not cached:
+          if dropdown_val == 'all' or dropdown_val == []:
+            data = df.copy()
+          else:
+            data = df.loc[df[variant_col].isin(dropdown_val)]
+            
+          # Check if time_col column is of type datetime, proceed if yes, convert 
+          # to datetime if no
+          if data.get(date_col).dtypes == '<M8[ns]':
             pass
-        else:
+          else:
             data['date'] = [datetime.datetime.strptime(date, '%Y-%m-%d').date()
                             for date in data[date_col]]
             date_col = 'date'
@@ -237,23 +260,30 @@ def update_output(start_date, end_date, dropdown_val, palette, smoothing_period)
             fig.update_layout(title='Daily Specimen Count by Variant',
                               yaxis_title='specimen count')
             
+            palette = palette if palette != 'turbo' else palette+" (default)"
             return f'{string_prefix} | Palette: {palette}', fig
 
-        # Creating a dictionary of variants (keys are variant names & values are 
-        # subset dataframes of variants)
-        variants_dict = {var: data[data[variant_col] == var] for var in variants}
+        if not cached:
+          # Creating a dictionary of variants (keys are variant names & values are 
+          # subset dataframes of variants)
+          variants_dict = {var: data[data[variant_col] == var] for var in variants}
 
-        # Calculating rolling averages for each variant dataframes in dictionary 
-        for key, value in variants_dict.items():
-            value.reset_index(inplace=True)
-            calculate_rolling_avg(value, 5, smoothing_period)
-            value.set_index('index', inplace=True)
-          
-        # Concatenating the dataframes into one for plotting, drop rows with N/A
-        variants_wra = pd.concat(variants_dict.values())
-        variants_wra = variants_wra.dropna(subset=[date_col])
+          # Calculating rolling averages for each variant dataframes in dictionary 
+          for key, value in variants_dict.items():
+              value.reset_index(inplace=True)
+              calculate_rolling_avg(value, 5, smoothing_period)
+              value.set_index('index', inplace=True)
+            
+          # Concatenating the dataframes into one for plotting, drop rows with N/A
+          variants_wra = pd.concat(variants_dict.values())
+          variants_wra = variants_wra.dropna(subset=[date_col])
 
-        fig = px.line(data_frame=variants_wra,
+          with open('data/memoize.pickle', 'wb') as f:
+            pickle.dump(variants_wra[[date_col, variant_col, 'specimens', 'rolling_avg']],
+                        f, 
+                        protocol=pickle.HIGHEST_PROTOCOL)
+
+        fig = px.line(data_frame=variants_wra if not cached else data,
                       x=date_col,
                       y='rolling_avg',
                       color=variant_col,
@@ -262,6 +292,7 @@ def update_output(start_date, end_date, dropdown_val, palette, smoothing_period)
         fig.update_layout(title=f'Daily Specimen Count by Variant, averaged {smoothing_period} days prior/after',
                           yaxis_title='specimen count')
 
+        palette = palette if palette != 'turbo' else palette+" (default)"
         return f'{string_prefix} | Palette: {palette}', fig
     
     raise PreventUpdate
