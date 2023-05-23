@@ -1,0 +1,9 @@
+Memory size of dataset object: 1931507 bytes
+Memory size of dataset file: 497774 bytes
+
+Memory size of dataset object (pickled): 1931507 bytes
+Memory size of pickle file: 429623 bytes
+
+Memory size of dataset object (pickled & zipped): 1931507 bytes
+Memory size of gzip file: 64542 bytes
+
