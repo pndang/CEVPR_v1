@@ -96,7 +96,6 @@ app.layout = dbc.Container([
         with_portal=True,
         end_date=datetime.date(2022, 9, 23),
         number_of_months_shown=3,
-
         clearable=True,
         reopen_calendar_on_clear=True
     ), 
