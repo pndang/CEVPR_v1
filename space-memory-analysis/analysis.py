@@ -79,3 +79,20 @@ result = f'Memory size of gzip file: {file_size_gzipped} bytes\n'
 print(result); results.write(result + '\n')
 
 results.close()
+
+
+# Consider: 
+# Compressibility
+# How complicated is it to revert back to original object?
+#     Consider decompresibility speed 
+
+# Last: comsider compression time 
+# Pickle: smaller and faster than csv, because pickle is in
+# binary format, pickle: loading byte by byte from memory
+#
+# Gzip isn't the best as LZNA compression, but super fast to compress
+# and decompress
+#
+# 
+#
+#
