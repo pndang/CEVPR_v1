@@ -3,7 +3,9 @@ Memory size of dataset file: 497774 bytes
 
 Memory size of dataset object (pickled): 1931507 bytes
 Memory size of pickle file: 429623 bytes
+Decompression time: 0.009971857070922852 seconds
 
 Memory size of dataset object (pickled & zipped): 1931507 bytes
 Memory size of gzip file: 64542 bytes
+Decompression time: 0.0030448436737060547 seconds
 

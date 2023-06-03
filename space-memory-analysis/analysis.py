@@ -8,6 +8,7 @@ import pickle
 import sys
 from util import *
 import gzip
+import time
 
 import warnings
 warnings.filterwarnings('ignore')
@@ -52,15 +53,23 @@ with open(wp, 'wb') as f:
     pickle.dump(data, f, protocol=pickle.HIGHEST_PROTOCOL)
 
 # Get memory size of resulting dataset pickle file
+start_time = time.time()
+
 with open(wp, 'rb') as f:
     df_from_pickle = pickle.load(f)
+
+end_time = time.time()
+execution_time = end_time - start_time
+
 obj_size_pkl = sys.getsizeof(df_from_pickle)
 result = f'Memory size of dataset object (pickled): {obj_size_pkl} bytes'
 print(result); results.write(result + '\n')
 
 file_size_pkl = os.stat(wp).st_size
-result = f'Memory size of pickle file: {file_size_pkl} bytes\n'
+result = f'Memory size of pickle file: {file_size_pkl} bytes'
 print(result); results.write(result + '\n')
+decomp_time = f'Decompression time: {execution_time} seconds\n'
+print(decomp_time); results.write(decomp_time + '\n')
 
 # Compress pickle file with gzip
 wp = os.path.join(path, 'covid19-variants-w-rolling-avg.pkl.gz')
@@ -68,15 +77,25 @@ with gzip.open(wp, 'wb') as f:
     pickle.dump(data, f, protocol=pickle.HIGHEST_PROTOCOL)
 
 # Get memory size of compressed pickle file
+start_time = time.time()
+
 with gzip.open(wp, 'rb') as f:
+    start_time = time.time()
     df_pkl_zipped = pickle.load(f)
+
+end_time = time.time()
+execution_time = end_time - start_time
+
 obj_size_gzipped = sys.getsizeof(df_pkl_zipped)
 result = f'Memory size of dataset object (pickled & zipped): {obj_size_gzipped} bytes'
 print(result); results.write(result + '\n')
 
 file_size_gzipped = os.stat(wp).st_size
-result = f'Memory size of gzip file: {file_size_gzipped} bytes\n'
+result = f'Memory size of gzip file: {file_size_gzipped} bytes'
 print(result); results.write(result + '\n')
+
+decomp_time = f'Decompression time: {execution_time} seconds\n'
+print(decomp_time); results.write(decomp_time + '\n')
 
 results.close()
 
@@ -92,7 +111,4 @@ results.close()
 #
 # Gzip isn't the best as LZNA compression, but super fast to compress
 # and decompress
-#
-# 
-#
 #
