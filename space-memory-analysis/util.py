@@ -23,6 +23,8 @@ def calculate_rolling_avg(dataframe, column_idx, num_rows):
   Notes:
     - The working data point for which its rolling average is calculated is 
       referred to as "main"
+    - pointer is always the middle element of the queue, except when calculating
+      averages for the last {num_rows} entries
     - pointer_offset is always equal to num_rows, pointer_offset keeps track of 
       how much the iterating index i is ahead of pointer by. Because of this
       offset, we use a loop that runs pointer_offset times to calculate rolling
