@@ -75,7 +75,7 @@ def calculate_rolling_avg(dataframe):
 
 
 # Importing dataset
-data = pd.read_csv("covid19variants.csv")
+data = pd.read_csv("C:/Users/phuro/UCSD/NiemaLab/data/covid19variants.csv")
 
 # ******************************************************************************
 
